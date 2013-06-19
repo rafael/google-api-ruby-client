@@ -15,6 +15,11 @@
 
 module Google
   class APIClient
+    attr_accessor :http_status
+
+    def initialize(status = nil)
+      @http_status = status
+    end
     ##
     # An error which is raised when there is an unexpected response or other
     # transport error that prevents an operation from succeeding.

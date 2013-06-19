@@ -38,7 +38,7 @@ module Google
   # This class manages APIs communication.
   class APIClient
     include Google::APIClient::Logging
-    
+
     ##
     # Creates a new Google API client.
     #
@@ -54,7 +54,7 @@ module Google
     #   </ul>
     # @option options [Boolean] :auto_refresh_token (true)
     #   The setting that controls whether or not the api client attempts to
-    #   refresh authorization when a 401 is hit in #execute. If the token does 
+    #   refresh authorization when a 401 is hit in #execute. If the token does
     #   not support it, this option is ignored.
     # @option options [String] :application_name
     #   The name of the application using the client.
@@ -75,7 +75,7 @@ module Google
     #   By default, a bundled set of trusted roots will be used.
     def initialize(options={})
       logger.debug { "#{self.class} - Initializing client with options #{options}" }
-      
+
       # Normalize key to String to allow indifferent access.
       options = options.inject({}) do |accu, (key, value)|
         accu[key.to_sym] = value
@@ -116,7 +116,7 @@ module Google
         faraday.ssl.ca_file = ca_file
         faraday.ssl.verify = true
         faraday.adapter Faraday.default_adapter
-      end      
+      end
       return self
     end
 
@@ -185,7 +185,7 @@ module Google
 
     ##
     # The setting that controls whether or not the api client attempts to
-    # refresh authorization when a 401 is hit in #execute. 
+    # refresh authorization when a 401 is hit in #execute.
     #
     # @return [Boolean]
     attr_accessor :auto_refresh_token
@@ -567,7 +567,7 @@ module Google
         options.update(params.shift) if params.size > 0
         request = self.generate_request(options)
       end
-      
+
       request.headers['User-Agent'] ||= '' + self.user_agent unless self.user_agent.nil?
       request.parameters['key'] ||= self.key unless self.key.nil?
       request.parameters['userIp'] ||= self.user_ip unless self.user_ip.nil?
@@ -585,7 +585,7 @@ module Google
            # Ignore since we want the original error
         end
       end
-      
+
       return result
     end
 
@@ -598,7 +598,8 @@ module Google
       result = self.execute(*params)
       if result.error?
         error_message = result.error_message
-        case result.response.status
+        http_status = result.response.status
+        case http_status
           when 400...500
             exception_type = ClientError
             error_message ||= "A client error has occurred."
@@ -609,13 +610,13 @@ module Google
             exception_type = TransmissionError
             error_message ||= "A transmission error has occurred."
         end
-        raise exception_type, error_message
+        raise exception_type.exception(http_status), error_message
       end
       return result
     end
-    
+
     protected
-    
+
     ##
     # Resolves a URI template against the client's configured base.
     #
@@ -641,7 +642,7 @@ module Google
       end
       return Addressable::Template.new(@base_uri + template).expand(mapping)
     end
-    
+
   end
 end
 
